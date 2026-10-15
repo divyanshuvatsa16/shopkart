@@ -1,0 +1,20 @@
+{
+  "name": "shopkart-backend",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "start": "node --env-file=.env index.js",
+    "dev": "node --watch --env-file=.env index.js",
+    "seed": "node --env-file=.env seed.js",
+    "test": "node --test"
+  },
+  "dependencies": {
+    "bcrypt": "^6.0.0",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.6",
+    "express": "^5.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.18.0",
+    "razorpay": "^2.9.8"
+  }
+}
