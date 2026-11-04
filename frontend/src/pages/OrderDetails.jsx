@@ -136,7 +136,25 @@ export default function OrderDetails() {
           Status: <span className={statusClass(order.status)}>{order.status}</span>
           <span className={statusClass(order.paymentStatus)}>Payment: {order.paymentStatus}</span>
           {order.paymentMethod && (
-            <span className="status-badge status-placed">Method: {order.paymentMethod}</span>
+            <span className="status-badge status-placed">
+              Method: {
+                order.paymentMethod === "UPI_QR"
+                  ? "UPI (Dynamic QR Code)"
+                  : order.paymentMethod === "UPI_COLLECT"
+                  ? "UPI (Payment Request)"
+                  : order.paymentMethod
+              }
+            </span>
+          )}
+          {(order.paymentDetails?.transactionId || order.razorpayPaymentId) && (
+            <span className="tabular-nums" style={{ fontSize: "11px", color: "var(--text-secondary)", fontFamily: "var(--font-mono)" }}>
+              Txn: {order.paymentDetails?.transactionId || order.razorpayPaymentId}
+            </span>
+          )}
+          {order.paymentDetails?.utr && (
+            <span className="tabular-nums" style={{ fontSize: "11px", color: "var(--text-secondary)", fontFamily: "var(--font-mono)" }}>
+              UTR: {order.paymentDetails.utr}
+            </span>
           )}
         </p>
 

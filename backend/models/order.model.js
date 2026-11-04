@@ -41,13 +41,15 @@ const orderSchema = new mongoose.Schema(
     },
     paymentMethod: {
       type: String,
-      enum: ["RAZORPAY", "COD", "UPI", "CARD", "DEMO"],
+      enum: ["RAZORPAY", "COD", "UPI", "UPI_QR", "UPI_COLLECT", "CARD", "DEMO"],
       default: "RAZORPAY",
     },
     paymentDetails: {
       upiId: { type: String, default: null },
       transactionId: { type: String, default: null },
       cardLast4: { type: String, default: null },
+      utr: { type: String, default: null },
+      mode: { type: String, default: null },
     },
     razorpayOrderId: { type: String, default: null },
     razorpayPaymentId: { type: String, default: null },

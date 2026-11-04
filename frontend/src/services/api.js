@@ -86,3 +86,6 @@ export const verifyPayment = (payload) =>
 export const getMyOrders = () => request("/orders");
 
 export const getMyOrder = (id) => request(`/orders/${id}`);
+
+export const getPaymentConfig = () => request("/orders/payment-config");
+

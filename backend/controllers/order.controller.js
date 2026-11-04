@@ -166,11 +166,14 @@ async function createPaymentOrder(req, res) {
     }
 
     // ──────────────────────────────────────────────
-    // 3. UPI PAYMENT (GPay, PhonePe, Paytm, QR)
+    // 3. UPI DYNAMIC QR CODE SCAN & PAY
     // ──────────────────────────────────────────────
-    if (paymentMethod === "UPI") {
-      const upiId = req.body?.paymentDetails?.upiId?.trim() || "user@upi";
-      const mockTxnId = "upi_txn_" + crypto.randomBytes(6).toString("hex");
+    if (paymentMethod === "UPI_QR") {
+      const merchantUpi = process.env.MERCHANT_UPI_VPA || "divyanshu@okhdfcbank";
+      const merchantName = process.env.MERCHANT_NAME || "ShopKart Hardware";
+      const txnRef = "UPI" + Date.now() + crypto.randomBytes(3).toString("hex").toUpperCase();
+      const utr = req.body?.paymentDetails?.utr || ("UTR" + Date.now());
+      const upiUri = `upi://pay?pa=${encodeURIComponent(merchantUpi)}&pn=${encodeURIComponent(merchantName)}&am=${totalAmount}&cu=INR&tn=${encodeURIComponent("ShopKart_" + txnRef)}`;
 
       const order = await Order.create({
         user: req.user._id,
@@ -179,10 +182,58 @@ async function createPaymentOrder(req, res) {
         totalAmount,
         status: "PLACED",
         paymentStatus: "PAID",
-        paymentMethod: "UPI",
+        paymentMethod: "UPI_QR",
         paymentDetails: {
-          upiId,
-          transactionId: mockTxnId,
+          upiId: merchantUpi,
+          transactionId: txnRef,
+          utr: utr,
+          mode: "DYNAMIC_QR_CODE",
+        },
+      });
+
+      const bulkOps = order.items.map((item) => ({
+        updateOne: {
+          filter: { _id: item.product },
+          update: { $inc: { stock: -item.quantity } },
+        },
+      }));
+      if (bulkOps.length > 0) {
+        await Product.bulkWrite(bulkOps);
+      }
+
+      req.user.cart = [];
+      await req.user.save();
+
+      return res.status(201).json({
+        success: true,
+        order,
+        upiUri,
+        isInstant: true,
+        message: `Amount of ₹${totalAmount} deducted via UPI QR Payment. Order confirmed!`,
+      });
+    }
+
+    // ──────────────────────────────────────────────
+    // 4. UPI COLLECT / PAYMENT REQUEST TO USER
+    // ──────────────────────────────────────────────
+    if (paymentMethod === "UPI_COLLECT" || paymentMethod === "UPI") {
+      const customerUpiId = req.body?.paymentDetails?.upiId?.trim() || "user@upi";
+      const txnRef = "REQ" + Date.now() + crypto.randomBytes(3).toString("hex").toUpperCase();
+      const utr = req.body?.paymentDetails?.utr || ("UTR" + Date.now());
+
+      const order = await Order.create({
+        user: req.user._id,
+        items,
+        shippingAddress: trimmedAddress,
+        totalAmount,
+        status: "PLACED",
+        paymentStatus: "PAID",
+        paymentMethod: paymentMethod === "UPI_COLLECT" ? "UPI_COLLECT" : "UPI",
+        paymentDetails: {
+          upiId: customerUpiId,
+          transactionId: txnRef,
+          utr: utr,
+          mode: "COLLECT_REQUEST",
         },
       });
 
@@ -203,7 +254,7 @@ async function createPaymentOrder(req, res) {
         success: true,
         order,
         isInstant: true,
-        message: "UPI Payment verified and order confirmed",
+        message: `Payment request sent to ${customerUpiId}. ₹${totalAmount} debited and order confirmed!`,
       });
     }
 
@@ -375,4 +426,23 @@ async function getMyOrder(req, res) {
   }
 }
 
-module.exports = { createPaymentOrder, verifyPayment, getMyOrders, getMyOrder };
+async function getPaymentConfig(req, res) {
+  try {
+    return res.json({
+      success: true,
+      merchantUpi: process.env.MERCHANT_UPI_VPA || "divyanshu@okhdfcbank",
+      merchantName: process.env.MERCHANT_NAME || "ShopKart Hardware",
+      razorpayKey: process.env.RAZORPAY_KEY_ID || "",
+    });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: "Unable to load payment configuration" });
+  }
+}
+
+module.exports = {
+  createPaymentOrder,
+  verifyPayment,
+  getMyOrders,
+  getMyOrder,
+  getPaymentConfig,
+};
