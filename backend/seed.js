@@ -5,7 +5,7 @@ const sampleProducts = [
   {
     name: "Oscilloscope 100MHz Dual Channel",
     description: "High-precision 100MHz digital storage oscilloscope with 1GSa/s real-time sampling rate, 7-inch TFT color display, and dual analog channels.",
-    price: 24999,
+    price: 249,
     category: "Electronics",
     image: "https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&w=800&q=80",
     stock: 12,
@@ -13,7 +13,7 @@ const sampleProducts = [
   {
     name: "Digital Multimeter TRMS 6000 Counts",
     description: "True-RMS digital multimeter with auto-ranging, NCV sensor, capacitance, temperature probe, and backlit LCD display.",
-    price: 4499,
+    price: 99,
     category: "Electronics",
     image: "https://images.unsplash.com/photo-1581092335397-9583fe92d232?auto=format&fit=crop&w=800&q=80",
     stock: 25,
@@ -21,7 +21,7 @@ const sampleProducts = [
   {
     name: "Soldering Station 60W ESD Safe",
     description: "Microprocessor-controlled 60W soldering station with PID temperature compensation, ceramic heating element, and ESD-safe grounding.",
-    price: 3299,
+    price: 99,
     category: "Electronics",
     image: "https://images.unsplash.com/photo-1597733336794-12d05021d510?auto=format&fit=crop&w=800&q=80",
     stock: 18,
@@ -29,7 +29,7 @@ const sampleProducts = [
   {
     name: "DC Bench Power Supply 30V 10A",
     description: "Variable switching DC power supply with 4-digit LED display, constant voltage/current modes, low ripple, and short-circuit protection.",
-    price: 8999,
+    price: 89,
     category: "Electronics",
     image: "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=800&q=80",
     stock: 8,
@@ -37,7 +37,7 @@ const sampleProducts = [
   {
     name: "Logic Analyzer 8-Channel USB",
     description: "Compact 24MHz 8-channel USB logic analyzer compatible with PulseView and Sigrok for decoding UART, I2C, SPI, and CAN protocols.",
-    price: 1899,
+    price: 89,
     category: "Electronics",
     image: "https://images.unsplash.com/photo-1517055729445-fa7d27394b48?auto=format&fit=crop&w=800&q=80",
     stock: 30,
@@ -45,7 +45,7 @@ const sampleProducts = [
   {
     name: "ESD Anti-Static Lab Coat",
     description: "Conductive grid anti-static lab coat engineered for cleanrooms and static-sensitive hardware assembly benches. Breathable static dissipative fabric.",
-    price: 1299,
+    price: 99,
     category: "Fashion",
     image: "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?auto=format&fit=crop&w=800&q=80",
     stock: 40,
@@ -61,7 +61,7 @@ const sampleProducts = [
   {
     name: "The Art of Electronics (3rd Edition)",
     description: "The definitive reference manual by Paul Horowitz and Winfield Hill covering analog and digital circuit design, components, and laboratory techniques.",
-    price: 4999,
+    price: 99,
     category: "Books",
     image: "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=800&q=80",
     stock: 15,
