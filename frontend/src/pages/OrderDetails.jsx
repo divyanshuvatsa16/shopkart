@@ -117,23 +117,27 @@ export default function OrderDetails() {
     );
   }
 
-  const justPlaced = order.status === "PLACED" && order.paymentStatus === "PAID";
+  const justPlaced = order.status === "PLACED";
+  const isPaid = order.paymentStatus === "PAID";
 
   return (
     <main className="products-page">
       <section className="products-content order-details-page" aria-labelledby="order-title">
         {justPlaced && (
           <p className="order-success" style={{ fontFamily: "var(--font-mono)", fontSize: "12px", color: "var(--accent-green)", marginBottom: "12px" }}>
-            ✓ ORDER CONFIRMED // PAYMENT RECEIVED
+            {isPaid ? "✓ ORDER CONFIRMED // PAYMENT RECEIVED" : "✓ ORDER CONFIRMED // PAYMENT ON DELIVERY"}
           </p>
         )}
         <p className="eyebrow">ORDER RECEIPT // VERIFIED PURCHASE</p>
         <h1 id="order-title" className="serif-heading">Order #{order._id.slice(-8).toUpperCase()}</h1>
         <p className="order-meta tabular-nums">Placed on {formatDate(order.createdAt)}</p>
 
-        <p className="order-status-row">
+        <p className="order-status-row" style={{ display: "flex", gap: "8px", flexWrap: "wrap", alignItems: "center" }}>
           Status: <span className={statusClass(order.status)}>{order.status}</span>
           <span className={statusClass(order.paymentStatus)}>Payment: {order.paymentStatus}</span>
+          {order.paymentMethod && (
+            <span className="status-badge status-placed">Method: {order.paymentMethod}</span>
+          )}
         </p>
 
         <section className="order-summary" aria-label="Items">

@@ -1,4 +1,4 @@
-const API_URL = "/api"
+const API_URL = "/api";
 
 async function request(path, options = {}) {
   const response = await fetch(`${API_URL}${path}`, {
@@ -69,10 +69,12 @@ export const updateCartItem = (productId, quantity) =>
 export const removeFromCart = (productId) =>
   request(`/cart/${productId}`, { method: "DELETE" });
 
-export const createPaymentOrder = (shippingAddress) =>
+export const createPaymentOrder = (payload) =>
   request("/orders/create-payment-order", {
     method: "POST",
-    body: JSON.stringify({ shippingAddress }),
+    body: JSON.stringify(
+      payload?.shippingAddress ? payload : { shippingAddress: payload }
+    ),
   });
 
 export const verifyPayment = (payload) =>
