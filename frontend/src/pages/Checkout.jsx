@@ -166,11 +166,11 @@ export default function Checkout() {
     }
   }, [cartLoading, cartItems.length, navigate]);
 
-  // Construct dynamic UPI Intent URI
+  // Construct dynamic UPI Intent URI (strict NPCI specification)
   const upiUri = useMemo(() => {
     const txnNote = encodeURIComponent(`ShopKart Order ${Date.now().toString().slice(-6)}`);
-    const merchantUpi = encodeURIComponent(merchantConfig.merchantUpi);
-    const merchantName = encodeURIComponent(merchantConfig.merchantName);
+    const merchantUpi = merchantConfig.merchantUpi?.trim();
+    const merchantName = encodeURIComponent(merchantConfig.merchantName || "ShopKart");
     return `upi://pay?pa=${merchantUpi}&pn=${merchantName}&am=${subtotal}&cu=INR&tn=${txnNote}`;
   }, [merchantConfig, subtotal]);
 
@@ -590,25 +590,37 @@ export default function Checkout() {
                                 Merchant Virtual Payment Address (VPA)
                               </p>
                               <div style={{ display: "flex", alignItems: "center", gap: "8px", marginTop: "4px" }}>
-                                <code
+                                <input
+                                  type="text"
+                                  value={merchantConfig.merchantUpi}
+                                  onChange={(e) =>
+                                    setMerchantConfig((prev) => ({ ...prev, merchantUpi: e.target.value }))
+                                  }
+                                  placeholder="yourname@upi or 9876543210@paytm"
+                                  title="Receiver UPI ID where payment will be credited"
                                   style={{
                                     backgroundColor: "var(--bg-panel)",
-                                    padding: "4px 8px",
+                                    padding: "6px 10px",
                                     fontSize: "13px",
                                     fontWeight: "700",
+                                    fontFamily: "var(--font-mono)",
+                                    border: "1px solid var(--border-clinical)",
+                                    flex: 1,
+                                    maxWidth: "240px",
                                   }}
-                                >
-                                  {merchantConfig.merchantUpi}
-                                </code>
+                                />
                                 <button
                                   type="button"
                                   onClick={handleCopyUpi}
                                   className="button button-secondary"
-                                  style={{ padding: "4px 10px", fontSize: "11px" }}
+                                  style={{ padding: "6px 10px", fontSize: "11px" }}
                                 >
                                   {qrCopied ? "✓ Copied!" : "Copy"}
                                 </button>
                               </div>
+                              <span style={{ fontSize: "11px", color: "var(--text-secondary)", marginTop: "4px", display: "block" }}>
+                                💡 Set to your active UPI ID to receive real payments directly into your bank account.
+                              </span>
 
                               <div style={{ marginTop: "12px" }}>
                                 <span style={{ fontSize: "11px", color: "var(--text-secondary)" }}>EXACT AMOUNT TO PAY: </span>
