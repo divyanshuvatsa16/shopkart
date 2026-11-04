@@ -169,11 +169,11 @@ async function createPaymentOrder(req, res) {
     // 3. UPI DYNAMIC QR CODE SCAN & PAY
     // ──────────────────────────────────────────────
     if (paymentMethod === "UPI_QR") {
-      const merchantUpi = process.env.MERCHANT_UPI_VPA || "divyanshu@okhdfcbank";
-      const merchantName = process.env.MERCHANT_NAME || "ShopKart Hardware";
+      const merchantUpi = process.env.MERCHANT_UPI_VPA || "8252757428-2@ybl";
+      const merchantName = process.env.MERCHANT_NAME || "Divyanshu Vatsa";
       const txnRef = "UPI" + Date.now() + crypto.randomBytes(3).toString("hex").toUpperCase();
       const utr = req.body?.paymentDetails?.utr || ("UTR" + Date.now());
-      const upiUri = `upi://pay?pa=${encodeURIComponent(merchantUpi)}&pn=${encodeURIComponent(merchantName)}&am=${totalAmount}&cu=INR&tn=${encodeURIComponent("ShopKart_" + txnRef)}`;
+      const upiUri = `upi://pay?pa=${merchantUpi}&pn=${encodeURIComponent(merchantName)}&am=${totalAmount}&cu=INR&tn=${encodeURIComponent("ShopKart_" + txnRef)}`;
 
       const order = await Order.create({
         user: req.user._id,
@@ -430,8 +430,8 @@ async function getPaymentConfig(req, res) {
   try {
     return res.json({
       success: true,
-      merchantUpi: process.env.MERCHANT_UPI_VPA || "divyanshu@okhdfcbank",
-      merchantName: process.env.MERCHANT_NAME || "ShopKart Hardware",
+      merchantUpi: process.env.MERCHANT_UPI_VPA || "8252757428-2@ybl",
+      merchantName: process.env.MERCHANT_NAME || "Divyanshu Vatsa",
       razorpayKey: process.env.RAZORPAY_KEY_ID || "",
     });
   } catch (error) {

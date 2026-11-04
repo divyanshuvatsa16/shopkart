@@ -107,8 +107,8 @@ export default function Checkout() {
 
   // Merchant config
   const [merchantConfig, setMerchantConfig] = useState({
-    merchantUpi: "divyanshu@okhdfcbank",
-    merchantName: "ShopKart Hardware",
+    merchantUpi: "8252757428-2@ybl",
+    merchantName: "Divyanshu Vatsa",
   });
 
   // Dynamic QR Code State
