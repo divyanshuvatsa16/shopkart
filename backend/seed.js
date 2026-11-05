@@ -70,24 +70,31 @@ const sampleProducts = [
 
 async function seed() {
   const mongoUri = process.env.MONGO_URI || "mongodb://127.0.0.1:27017/shopkart";
-  console.log(`Connecting to database at ${mongoUri}...`);
-  await mongoose.connect(mongoUri);
+  try {
+    await mongoose.connect(mongoUri);
+    const result = await Product.bulkWrite(
+      sampleProducts.map(({ name, description, price, category, image, stock }) => ({
+        updateOne: {
+          filter: { name },
+          update: {
+            $set: { description, price, category, image },
+            $setOnInsert: { name, stock },
+          },
+          upsert: true,
+        },
+      }))
+    );
 
-  const existingCount = await Product.countDocuments();
-  if (existingCount > 0) {
-    console.log(`Clearing existing ${existingCount} products...`);
-    await Product.deleteMany({});
+    console.log(
+      `Catalog synchronized: ${result.upsertedCount} products added, ` +
+        `${result.modifiedCount} products updated. Existing stock was preserved.`
+    );
+  } finally {
+    await mongoose.disconnect();
   }
-
-  console.log("Seeding initial products into database...");
-  const created = await Product.insertMany(sampleProducts);
-  console.log(`Successfully seeded ${created.length} products!`);
-
-  await mongoose.disconnect();
-  console.log("Done.");
 }
 
 seed().catch((err) => {
-  console.error("Seeding error:", err);
-  process.exit(1);
+  console.error("Catalog synchronization failed:", err.message);
+  process.exitCode = 1;
 });

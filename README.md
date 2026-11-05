@@ -554,6 +554,6 @@ The root `render.yaml` defines one Render web service. It builds the frontend an
 2. Connect `divyanshuvatsa16/shopkart` and select the branch you want to deploy. Render reads `render.yaml` and creates the `shopkart` service.
 3. Create a MongoDB Atlas database and copy its connection string. Add it as `MONGO_URI` when Render prompts for the Blueprint's required environment variables. Make sure the Atlas database user has access and Atlas network access allows Render to connect (for a quick setup, Atlas allows `0.0.0.0/0`; use strong database credentials).
 4. Add `RAZORPAY_KEY_ID` and `RAZORPAY_KEY_SECRET`. These are required for the API to start; use Razorpay test keys until you are ready for live payments. Render generates `JWT_SECRET` automatically.
-5. Deploy the service and open its `onrender.com` URL. The API health check is `/products`; test product loading and registration/login.
+5. Deploy the service, then open its **Shell** and run `node backend/seed.js` once to synchronize the catalog with the current seed data. This updates product details, prices, and images without deleting other products or resetting existing stock. The API health check is `/products`; open the service's `onrender.com` URL to test product loading and registration/login.
 
 Free Render web services may sleep when idle, so the first request after inactivity can take longer. Keep all secrets in Render's environment settings; do not commit them to the repository.
