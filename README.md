@@ -27,7 +27,7 @@ The platform includes end-to-end user workflows: product discovery with multi-pa
 - [5. Technical Decisions & Architectural Patterns](#5-technical-decisions--architectural-patterns)
   - [Serverless-Ready Database Connection Caching](#1-serverless-ready-database-connection-caching)
   - [HTTP-Only Cookie-Based Authentication](#2-http-only-cookie-based-authentication)
-  - [Reverse-Proxy Architecture on Vercel](#3-reverse-proxy-architecture-on-vercel)
+  - [Configurable API Base URL](#3-configurable-api-base-url)
   - [Order Snapshotting for Historical Integrity](#4-order-snapshotting-for-historical-integrity)
   - [Server-Side Financial Calculations & Stock Safeguards](#5-server-side-financial-calculations--stock-safeguards)
   - [Timing-Safe Payment Signature Verification](#6-timing-safe-payment-signature-verification)
@@ -162,6 +162,7 @@ ShopKart/
     ├── vercel.json                # API reverse proxy configuration for Vercel
     ├── vite.config.js             # Vite configuration with React & Vitest
     └── package.json
+├── render.yaml                    # Render Blueprint for the API and frontend
 ```
 
 ---
@@ -435,17 +436,10 @@ Storing authentication tokens in browser `localStorage` or `sessionStorage` expo
 - **Decision**: Tokens are signed as JWTs and returned inside `httpOnly: true` cookies (with `secure: true` when `NODE_ENV === "production"`).
 - **Session Hydration**: On app startup, `AuthContext` calls `/customers/me` to safely populate the user session without client-side token exposure.
 
-### 3. Reverse-Proxy Architecture on Vercel
-Modern browsers enforce strict third-party cookie restrictions (e.g., Safari ITP and Chrome privacy controls). When the frontend is hosted on a different domain than the backend, cross-origin cookies can be blocked or dropped.
-- **Solution**: The frontend `vercel.json` configures a native rewrite:
-  ```json
-  {
-    "rewrites": [
-      { "source": "/api/:path*", "destination": "https://shopkart-kappa-ruddy.vercel.app/:path*" }
-    ]
-  }
-  ```
-- **Benefit**: Browser requests to `/api/*` are treated as same-origin requests, preserving cookies reliably across all browsers without third-party cookie workarounds.
+### 3. Configurable API Base URL
+- **Local development**: The frontend defaults to `/api`, which the Vite dev server proxies to the local Express backend.
+- **Render**: One web service serves both the frontend and API on the same origin. `VITE_API_URL=/` makes frontend requests same-origin, preserving cookie-based authentication.
+- **Vercel**: The existing `frontend/vercel.json` rewrite continues to proxy `/api/*` requests.
 
 ### 4. Order Snapshotting for Historical Integrity
 In e-commerce databases, storing only foreign references to product documents within an order introduces data corruption when product titles, images, or prices update later.
@@ -552,27 +546,14 @@ The frontend Vite development server will start at `http://localhost:5173`.
 
 ---
 
-## 8. Deployment Guide
+## 8. Deployment Guide (Render)
 
-### Backend Deployment (e.g. Vercel / Render / AWS)
-1. Ensure the following environment variables are configured in your deployment platform:
-   - `MONGO_URI`
-   - `JWT_SECRET`
-   - `JWT_EXPIRES_IN`
-   - `FRONTEND_ORIGIN` (set to your production frontend URL)
-   - `NODE_ENV=production`
-   - `RAZORPAY_KEY_ID`
-   - `RAZORPAY_KEY_SECRET`
-2. Run build/start command: `npm start` (or let the serverless handler invoke `createApp()`).
+The root `render.yaml` defines one Render web service. It builds the frontend and serves it from Express alongside the API, keeping cookie-based authentication on the same origin.
 
-### Frontend Deployment (Vercel)
-1. Connect your frontend directory to Vercel.
-2. In `frontend/vercel.json`, verify the destination URL points to your deployed backend:
-   ```json
-   {
-     "rewrites": [
-       { "source": "/api/:path*", "destination": "https://<your-backend-app>.vercel.app/:path*" }
-     ]
-   }
-   ```
-3. Set the build command to `npm run build` and output directory to `dist`.
+1. Push this repository to GitHub, then sign in to [Render](https://render.com/) and choose **New → Blueprint**.
+2. Connect `divyanshuvatsa16/shopkart` and select the branch you want to deploy. Render reads `render.yaml` and creates the `shopkart` service.
+3. Create a MongoDB Atlas database and copy its connection string. Add it as `MONGO_URI` when Render prompts for the Blueprint's required environment variables. Make sure the Atlas database user has access and Atlas network access allows Render to connect (for a quick setup, Atlas allows `0.0.0.0/0`; use strong database credentials).
+4. Add `RAZORPAY_KEY_ID` and `RAZORPAY_KEY_SECRET`. These are required for the API to start; use Razorpay test keys until you are ready for live payments. Render generates `JWT_SECRET` automatically.
+5. Deploy the service and open its `onrender.com` URL. The API health check is `/products`; test product loading and registration/login.
+
+Free Render web services may sleep when idle, so the first request after inactivity can take longer. Keep all secrets in Render's environment settings; do not commit them to the repository.

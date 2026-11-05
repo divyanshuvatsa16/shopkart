@@ -2,6 +2,8 @@ const express = require("express");
 const mongoose = require("mongoose");
 const cookieParser = require("cookie-parser");
 const cors = require("cors");
+const fs = require("fs");
+const path = require("path");
 const customerRoutes = require("./routes/customer.routes");
 const productRoutes = require("./routes/product.routes");
 const wishlistRoutes = require("./routes/wishlist.routes");
@@ -19,6 +21,20 @@ function createApp() {
   );
   app.use(express.json());
   app.use(cookieParser());
+
+  const frontendDirectory = path.resolve(__dirname, "../frontend/dist");
+  const frontendIndex = path.join(frontendDirectory, "index.html");
+  if (fs.existsSync(frontendIndex)) {
+    app.use(express.static(frontendDirectory));
+    app.use((req, res, next) => {
+      // Serve client routes for browser navigations, not JSON fetch requests.
+      if (req.method !== "GET" || !req.get("accept")?.includes("text/html")) {
+        return next();
+      }
+
+      return res.sendFile(frontendIndex);
+    });
+  }
 
   // Ensure DB is connected before handling any request (serverless-safe)
   app.use(async (req, res, next) => {
